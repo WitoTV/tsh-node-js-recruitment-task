@@ -1,0 +1,39 @@
+{
+  "name": "tsh-recruitment-task",
+  "version": "1.0.0",
+  "description": "TSH recruitment task",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/thesoftwarehouse/node-recruitement-example.git"
+  },
+  "author": "TSH - The Software House",
+  "license": "MIT",
+  "homepage": "https://bitbucket.org/thesoftwarehouse/node-recruitement-example#readme",
+  "dependencies": {
+    "express": "^4.16.3",
+    "uuid": "^3.2.1"
+  },
+  "devDependencies": {
+    "jest": "^22.4.4",
+    "supertest": "^3.1.0"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/**/index.js"
+    ],
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  }
+}
