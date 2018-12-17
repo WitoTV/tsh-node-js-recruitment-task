@@ -1,7 +1,8 @@
-var Post = require('./post/post.model');
-var express = require('express');
-var app = express();
-var posts = [];
+const Post = require('./post/post.model');
+const express = require('express');
+const app = express();
+const bodyParser = require('body-parser');
+let posts = [];
 
 var addPost = function(post) {
   posts.push(post);
@@ -34,6 +35,8 @@ var removePost = function(postId) {
 var getPosts = function() {
   return Promise.resolve(posts);
 };
+
+app.use(bodyParser.json());
 
 app.post('/posts', function(req, res) {
   addPost(Post.fromRequestBody(req.body))
