@@ -10,7 +10,15 @@ const addPost = (post) => {
     'title': yup.string().required('Title is required'),
     'content': yup.string().required('Content is required')
   });
-  return validation.validate(post, {'abortEarly': false});
+  return validation
+    .validate(post, {'abortEarly': false})
+    .then((value) => {
+      posts.push(value);
+      return Post.fromRequestBody(post);
+    })
+    .catch((error) => {
+      throw error.errors;
+    });
 };
 
 const getPostById = (postId) => {
@@ -44,8 +52,6 @@ app.use(bodyParser.json());
 app.post('/posts', (req, res, next) => {
   addPost(req.body)
     .then((post) => {
-      post = Post.fromRequestBody(post);
-      posts.push(post.toJSON());
       res
         .status(201)
         .json({
@@ -54,8 +60,7 @@ app.post('/posts', (req, res, next) => {
         })
     })
     .catch((error) => {
-      console.log(error);
-      res.error = {'status': 500, 'message': error.errors};
+      res.error = {'status': 500, 'message': error};
       next();
     })
 });
