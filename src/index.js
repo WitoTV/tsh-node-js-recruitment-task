@@ -4,14 +4,13 @@ const app = express();
 const bodyParser = require('body-parser');
 let posts = [];
 
-var addPost = function(post) {
+const addPost = (post) => {
   posts.push(post);
-
   return Promise.resolve(post)
 };
 
-var getPostById = function(postId) {
-  var post = posts.find(post => post.id === postId);
+const getPostById = (postId) => {
+  const post = posts.find(post => post.id === postId);
 
   if (!post) {
     return Promise.reject('Error occurred');
@@ -20,8 +19,8 @@ var getPostById = function(postId) {
   return Promise.resolve(post);
 };
 
-var removePost = function(postId) {
-  var postIndex = posts.findIndex(post => post.id === postId);
+const removePost = (postId) => {
+  const postIndex = posts.findIndex(post => post.id === postId);
 
   if (postIndex < 0) {
     return Promise.reject('Error occurred');
@@ -32,7 +31,7 @@ var removePost = function(postId) {
   return Promise.resolve();
 };
 
-var getPosts = function() {
+const getPosts = () => {
   return Promise.resolve(posts);
 };
 
