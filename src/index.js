@@ -13,7 +13,6 @@ const addPost = (post) => {
   return validation
     .validate(post, {'abortEarly': false})
     .then((value) => {
-      posts.push(value);
       return Post.fromRequestBody(post);
     })
     .catch((error) => {
@@ -52,6 +51,7 @@ app.use(bodyParser.json());
 app.post('/posts', (req, res, next) => {
   addPost(req.body)
     .then((post) => {
+      posts.push(post);
       res
         .status(201)
         .json({
