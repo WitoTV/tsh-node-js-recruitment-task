@@ -2,18 +2,22 @@ const Post = require('./post/post.model');
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+const yup = require('yup');
 let posts = [];
 
 const addPost = (post) => {
-  posts.push(post);
-  return Promise.resolve(post)
+  const validation = yup.object().shape({
+    'title': yup.string().required('Title is required'),
+    'content': yup.string().required('Content is required')
+  });
+  return validation.validate(post, {'abortEarly': false});
 };
 
 const getPostById = (postId) => {
   const post = posts.find(post => post.id === postId);
 
   if (!post) {
-    return Promise.reject('Error occurred');
+    return Promise.reject('This post does not exist');
   }
 
   return Promise.resolve(post);
@@ -23,7 +27,7 @@ const removePost = (postId) => {
   const postIndex = posts.findIndex(post => post.id === postId);
 
   if (postIndex < 0) {
-    return Promise.reject('Error occurred');
+    return Promise.reject('This post does not exist');
   }
 
   posts = posts.filter(post => post.id !== postId);
@@ -37,9 +41,11 @@ const getPosts = () => {
 
 app.use(bodyParser.json());
 
-app.post('/posts', function(req, res) {
-  addPost(Post.fromRequestBody(req.body))
-    .then(post => {
+app.post('/posts', (req, res, next) => {
+  addPost(req.body)
+    .then((post) => {
+      post = Post.fromRequestBody(post);
+      posts.push(post.toJSON());
       res
         .status(201)
         .json({
@@ -47,14 +53,14 @@ app.post('/posts', function(req, res) {
           payload: post.toJSON()
         })
     })
-    .catch(error => {
-      res
-        .status(500)
-        .json({ error });
+    .catch((error) => {
+      console.log(error);
+      res.error = {'status': 500, 'message': error.errors};
+      next();
     })
 });
 
-app.get('/posts', function(req, res) {
+app.get('/posts', (req, res, next) => {
   getPosts()
     .then((posts) => {
       res
@@ -63,14 +69,13 @@ app.get('/posts', function(req, res) {
           payload: posts
         })
     })
-    .catch(error => {
-      res
-        .status(500)
-        .json({ error });
+    .catch((error) => {
+      res.error = {'status': 500, 'message': error};
+      next();
     })
 });
 
-app.get('/posts/:postId', function(req, res) {
+app.get('/posts/:postId', (req, res, next) => {
   getPostById(req.params.postId)
     .then((post) => {
       res
@@ -79,14 +84,13 @@ app.get('/posts/:postId', function(req, res) {
           payload: post.toJSON()
         })
     })
-    .catch(error => {
-      res
-        .status(500)
-        .json({ error });
+    .catch((error) => {
+      res.error = {'status': 500, 'message': error};
+      next();
     })
 });
 
-app.delete('/posts/:postId', function(req, res) {
+app.delete('/posts/:postId', (req, res, next) => {
   removePost(req.params.postId)
     .then(() => {
       res
@@ -95,11 +99,31 @@ app.delete('/posts/:postId', function(req, res) {
           message: 'Post removed'
         })
     })
-    .catch(error => {
-      res
-        .status(500)
-        .json({ error });
+    .catch((error) => {
+      res.error = {'status': 500, 'message': error};
+      next();
     })
 });
+
+app.use((req, res) => {
+  if (!!res.error) {
+    res
+      .status(res.error.status)
+      .json({
+        'error': 'Error occuried',
+        'status': res.error.status,
+        'message': res.error.message
+      })
+    return;
+  }
+  res
+    .status(404)
+    .json({
+      'error': 'Not Found',
+      'status': 404,
+      'message': ''
+    });
+  return;
+})
 
 module.exports = app;
